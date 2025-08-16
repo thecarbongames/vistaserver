@@ -71,11 +71,22 @@ wss.on('connection', function connection(ws, req) {
         const messageData = data.toString();
         console.log('Received message: ' + messageData);
         
-        // Don't broadcast status messages, only regular signaling messages
+        // Handle dashboard status requests
         try {
             const parsed = JSON.parse(messageData);
+            if (parsed.type === 'request_status' && isDashboard) {
+                // Send current status to requesting dashboard
+                const statusUpdate = {
+                    type: 'status',
+                    connectedUsers: Array.from(clients.values()).filter(client => !client.isDashboard).length,
+                    message: `Current connected clients: ${Array.from(clients.values()).filter(client => !client.isDashboard).length}`,
+                    timestamp: new Date().toISOString()
+                };
+                ws.send(JSON.stringify(statusUpdate));
+                return;
+            }
             if (parsed.type === 'status') {
-                return; // Skip status messages
+                return; // Skip other status messages
             }
         } catch (e) {
             // Not JSON, treat as regular message

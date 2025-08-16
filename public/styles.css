@@ -52,6 +52,29 @@ h1 {
     gap: 1rem;
 }
 
+.wip-controls {
+    background: rgba(128,128,128,0.2);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0.6;
+    border: 2px dashed rgba(128,128,128,0.4);
+}
+
+.wip-controls h3 {
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: normal;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .btn {
     padding: 0.8rem 2rem;
     border: none;
@@ -88,6 +111,19 @@ h1 {
     background: linear-gradient(135deg, #dc2626, #b91c1c);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-wip {
+    background: #6b7280;
+    color: #d1d5db;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.btn-wip:hover {
+    background: #6b7280;
+    transform: none;
+    box-shadow: none;
 }
 
 .status {
@@ -153,7 +189,7 @@ h1 {
         font-size: 2rem;
     }
     
-    .stats, .controls {
+    .stats, .controls, .wip-controls {
         padding: 0.8rem 1.5rem;
     }
     
@@ -165,9 +201,13 @@ h1 {
         font-size: 1.5rem;
     }
     
-    .controls {
+    .controls, .wip-controls {
         flex-direction: column;
         gap: 0.8rem;
+    }
+    
+    .wip-controls h3 {
+        font-size: 0.9rem;
     }
     
     .btn {
