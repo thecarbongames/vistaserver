@@ -42,7 +42,7 @@ npm start
 or
 
 ```bash
-node server.js
+node index.js
 ```
 
 The server will start on port 8080 and display:
@@ -121,7 +121,7 @@ Here's a simple HTML/JavaScript client to test the server:
 ## File Structure
 
 ```
-├── server.js          # Main server file
+├── index.js          # Main server file
 ├── package.json       # Project configuration and dependencies
 └── README.md         # This file
 ```
