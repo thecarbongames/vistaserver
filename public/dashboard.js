@@ -154,7 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Handle page visibility change to reconnect when tab becomes active
 document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && (!ws || ws.readyState !== WebSocket.OPEN) && !isManualDisconnect) {
+    if (!document.hidden && (!ws || ws.readyState !== WebSocket.OPEN) && !isManualDisconnect && ws !== undefined) {
+        // Only reconnect if user has previously connected (ws has been initialized)
         connectWebSocket();
     }
 });

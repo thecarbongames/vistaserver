@@ -30,13 +30,13 @@ const clients = new Map();
 function broadcastStatus(message) {
     const statusUpdate = {
         type: 'status',
-        connectedUsers: clients.size,
+        connectedUsers: Array.from(clients.values()).filter(client => !client.isDashboard).length,
         message: message,
         timestamp: new Date().toISOString()
     };
     
     clients.forEach((client, clientId) => {
-        if (client.readyState === WebSocket.OPEN) {
+        if (client.readyState === WebSocket.OPEN && client.isDashboard) {
             try {
                 client.send(JSON.stringify(statusUpdate));
             } catch (e) {
@@ -47,16 +47,22 @@ function broadcastStatus(message) {
 }
 
 // Handle new connections
-wss.on('connection', function connection(ws) {
+wss.on('connection', function connection(ws, req) {
+    // Check if this is a dashboard monitoring connection
+    const userAgent = req.headers['user-agent'] || '';
+    const isDashboard = userAgent.includes('Mozilla') && req.headers.origin;
+    
     // Generate unique ID for this connection
     const sessionId = uuidv4();
     
     // Store the client with its ID
     clients.set(sessionId, ws);
     ws.sessionId = sessionId;
+    ws.isDashboard = isDashboard;
     
     // Log that a new connection was opened
-    const connectionMessage = 'Connection opened with: ' + sessionId;
+    const connectionType = isDashboard ? 'Dashboard' : 'Client';
+    const connectionMessage = `${connectionType} connection opened with: ${sessionId}`;
     console.log(connectionMessage);
     broadcastStatus(connectionMessage);
     
@@ -75,9 +81,9 @@ wss.on('connection', function connection(ws) {
             // Not JSON, treat as regular message
         }
         
-        // Send the received message to all clients except the sender
+        // Send the received message to all non-dashboard clients except the sender
         clients.forEach((client, clientId) => {
-            if (clientId !== sessionId && client.readyState === WebSocket.OPEN) {
+            if (clientId !== sessionId && client.readyState === WebSocket.OPEN && !client.isDashboard) {
                 client.send(messageData);
             }
         });
@@ -85,7 +91,8 @@ wss.on('connection', function connection(ws) {
     
     // Handle connection close
     ws.on('close', function close() {
-        const disconnectionMessage = 'Connection closed with: ' + sessionId;
+        const connectionType = isDashboard ? 'Dashboard' : 'Client';
+        const disconnectionMessage = `${connectionType} connection closed with: ${sessionId}`;
         console.log(disconnectionMessage);
         clients.delete(sessionId);
         broadcastStatus(disconnectionMessage);
@@ -93,7 +100,8 @@ wss.on('connection', function connection(ws) {
     
     // Handle errors
     ws.on('error', function error(err) {
-        const errorMessage = 'WebSocket error for ' + sessionId + ': ' + err.message;
+        const connectionType = isDashboard ? 'Dashboard' : 'Client';
+        const errorMessage = `WebSocket error for ${connectionType} ${sessionId}: ${err.message}`;
         console.log(errorMessage);
         clients.delete(sessionId);
         broadcastStatus(errorMessage);
