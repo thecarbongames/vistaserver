@@ -6,7 +6,7 @@ A WebRTC signaling server that facilitates the initial handshake between the Vis
 
 1. Navigate to the project directory:
    ```bash
-   cd webrtc-signaling-server
+   cd vistaserver
    ```
 
 2. Install dependencies:
