@@ -1,0 +1,24 @@
+{
+  "name": "vistaserver",
+  "version": "1.0.0",
+  "description": "A simple WebSocket server built with Node.js that receives messages from connected clients and broadcasts them to all other connected clients (excluding the sender). This creates a real-time communication system where all clients can receive messages sent by any other client.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thecarbongames/vistaserver.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thecarbongames/vistaserver/issues"
+  },
+  "homepage": "https://github.com/thecarbongames/vistaserver#readme",
+  "dependencies": {
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3"
+  }
+}
