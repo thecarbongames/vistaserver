@@ -46,6 +46,22 @@ function broadcastStatus(message) {
     });
 }
 
+// Function to notify all other connected clients about new client connection
+function notifyNewClientConnection(newSessionId) {
+    const newClientMessage = `NewClientConnect#${newSessionId}`;
+    
+    clients.forEach((client, clientId) => {
+        // Send to all non-dashboard clients except the newly connected one
+        if (clientId !== newSessionId && client.readyState === WebSocket.OPEN && !client.isDashboard) {
+            try {
+                client.send(newClientMessage);
+            } catch (e) {
+                console.log('Error sending new client notification to client:', clientId);
+            }
+        }
+    });
+}
+
 // Handle new connections
 wss.on('connection', function connection(ws, req) {
     // Check if this is a dashboard monitoring connection
@@ -65,6 +81,12 @@ wss.on('connection', function connection(ws, req) {
     const connectionMessage = `${connectionType} connection opened with: ${sessionId}`;
     console.log(connectionMessage);
     broadcastStatus(connectionMessage);
+    
+    // If this is a new client (not dashboard), notify all other connected clients
+    if (!isDashboard) {
+        notifyNewClientConnection(sessionId);
+        console.log(`Notified all clients about new connection: ${sessionId}`);
+    }
     
     // Handle incoming messages
     ws.on('message', function message(data) {
