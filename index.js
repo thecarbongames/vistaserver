@@ -76,6 +76,9 @@ wss.on('connection', function connection(ws, req) {
     ws.sessionId = sessionId;
     ws.isDashboard = isDashboard;
     
+    // Send the client ID immediately upon connection
+    ws.send(`YOUR_ID#${sessionId}`);
+    
     // Log that a new connection was opened
     const connectionType = isDashboard ? 'Dashboard' : 'Client';
     const connectionMessage = `${connectionType} connection opened with: ${sessionId}`;
