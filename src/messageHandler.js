@@ -78,7 +78,8 @@ function handleServerMessage(ws, purpose, messageContent, sessionId) {
       break;
     }
     case Purposes.UpdateConnectionList: {
-      updateUserConnectionList(sessionId);
+      let connectionList = JSON.parse(messageContent);
+      updateUserConnectionList(sessionId, connectionList);
       break;
     }
 
@@ -89,11 +90,25 @@ function handleServerMessage(ws, purpose, messageContent, sessionId) {
 }
 
 // Function to update user connection list
-function updateUserConnectionList(sessionId) {}
+function updateUserConnectionList(sessionId, connectionList) {
+  const user = wsUsers.get(sessionId);
+  if (!user) {
+    log.warning(`User not found for sessionId: ${sessionId}`);
+    return;
+  }
+  user.connectionList = connectionList;
+  log.success(`Updated connection list for ${sessionId}`, connectionList);
+
+  // Get all dashboards and notify them of the updated connection list
+  const dashboards = getDashboards();
+  dashboards.forEach((dashboard) => {
+    dashboard.send("MUST_UPDATE_CONNECTION_LIST");
+  });
+}
 
 // Handle sender user info update
 function handleSenderUpdate(ws, sessionId) {
-  const allAvailableClients = getReadyClients().map((client) => client.wsid);
+  const allAvailableClients = getReadyClients();
 
   // Send available clients to the sender
   const availableClientsMessage = {
@@ -114,12 +129,7 @@ function handleClientUpdate(sessionId) {
     message: sessionId,
   };
 
-  const allSenders = Array.from(wsUsers.values()).filter(
-    (client) =>
-      client.readyState === WebSocket.OPEN &&
-      client.userInfo &&
-      client.userInfo.activityType === "Sender"
-  );
+  const allSenders = getReadySenders();
 
   allSenders.forEach((sender) => {
     sender.send(JSON.stringify(newClientWsidMessage));

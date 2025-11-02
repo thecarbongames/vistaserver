@@ -15,12 +15,14 @@ export function getReadySenders() {
 }
 
 export function getReadyClients() {
-  return Array.from(getNonDashboardUsers()).filter(
-    (wsUser) =>
-      wsUser.userInfo &&
-      wsUser.userInfo.isReadyToConnect &&
-      wsUser.userInfo.activityType === "Client"
-  );
+  return Array.from(getNonDashboardUsers())
+    .filter(
+      (wsUser) =>
+        wsUser.userInfo &&
+        wsUser.userInfo.isReadyToConnect &&
+        wsUser.userInfo.activityType === "Client"
+    )
+    .map((wsUser) => wsUser.userInfo.wsid);
 }
 function getNonDashboardUsers() {
   return Array.from(wsUsers.values()).filter(
