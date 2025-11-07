@@ -6,6 +6,7 @@ import {
   removeClient,
   broadcastStatus,
   notifyNewClientConnection,
+  notifyUserDisconnected,
 } from "./clientManager.js";
 import { handleMessage } from "./messageHandler.js";
 
@@ -60,6 +61,8 @@ export function handleConnection(ws, req) {
       log.client(`Disconnected: ${sessionId}`);
     }
     removeClient(sessionId);
+    // Notify all WS users about the disconnection
+    notifyUserDisconnected(sessionId);
     broadcastStatus(`${connectionType} connection closed with: ${sessionId}`);
   });
 
@@ -71,6 +74,8 @@ export function handleConnection(ws, req) {
       err.message
     );
     removeClient(sessionId);
+    // Also notify on error-triggered disconnects
+    notifyUserDisconnected(sessionId);
     broadcastStatus(
       `WebSocket error for ${connectionType} ${sessionId}: ${err.message}`
     );

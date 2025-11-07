@@ -1,3 +1,5 @@
+import process from "process";
+
 // Console colors and logging utilities
 const colors = {
   reset: "\x1b[0m",
@@ -18,40 +20,82 @@ const colors = {
   bgCyan: "\x1b[46m",
 };
 
+// Log level gating
+const LEVELS = { silent: 0, error: 1, warn: 2, info: 3, debug: 4 };
+const envLevelName = (process.env.LOG_LEVEL || "").toLowerCase();
+const defaultLevelName =
+  process.env.NODE_ENV === "production" ? "error" : "debug";
+const levelName = LEVELS[envLevelName] ? envLevelName : defaultLevelName;
+let currentLevel = LEVELS[levelName];
+
+function should(level) {
+  return LEVELS[level] <= currentLevel;
+}
+
+function setLogLevel(name) {
+  const n = (name || "").toLowerCase();
+  if (LEVELS[n] !== undefined) currentLevel = LEVELS[n];
+}
+
+function getLogLevel() {
+  return Object.keys(LEVELS).find((k) => LEVELS[k] === currentLevel);
+}
+
 const log = {
-  info: (msg, data = "") =>
-    console.log(`${colors.cyan}ℹ ${colors.white}${msg}${colors.reset}`, data),
-  success: (msg, data = "") =>
-    console.log(`${colors.green}✓ ${colors.white}${msg}${colors.reset}`, data),
-  warning: (msg, data = "") =>
-    console.log(`${colors.yellow}⚠ ${colors.white}${msg}${colors.reset}`, data),
-  error: (msg, data = "") =>
-    console.log(`${colors.red}✗ ${colors.white}${msg}${colors.reset}`, data),
-  server: (msg, data = "") =>
+  info: (msg, data = "") => {
+    if (!should("info")) return;
+    console.log(`${colors.cyan}ℹ ${colors.white}${msg}${colors.reset}`, data);
+  },
+  success: (msg, data = "") => {
+    if (!should("info")) return;
+    console.log(`${colors.green}✓ ${colors.white}${msg}${colors.reset}`, data);
+  },
+  warning: (msg, data = "") => {
+    if (!should("warn")) return;
+    console.warn(
+      `${colors.yellow}⚠ ${colors.white}${msg}${colors.reset}`,
+      data
+    );
+  },
+  error: (msg, data = "") => {
+    if (!should("error")) return;
+    console.error(`${colors.red}✗ ${colors.white}${msg}${colors.reset}`, data);
+  },
+  server: (msg, data = "") => {
+    if (!should("info")) return;
     console.log(
       `${colors.bgBlue}${colors.white} SERVER ${colors.reset} ${colors.blue}${msg}${colors.reset}`,
       data
-    ),
-  client: (msg, data = "") =>
+    );
+  },
+  client: (msg, data = "") => {
+    if (!should("info")) return;
     console.log(
       `${colors.bgGreen}${colors.white} CLIENT ${colors.reset} ${colors.green}${msg}${colors.reset}`,
       data
-    ),
-  dashboard: (msg, data = "") =>
+    );
+  },
+  dashboard: (msg, data = "") => {
+    if (!should("info")) return;
     console.log(
       `${colors.bgMagenta}${colors.white} DASHBOARD ${colors.reset} ${colors.magenta}${msg}${colors.reset}`,
       data
-    ),
-  ws: (msg, data = "") =>
+    );
+  },
+  ws: (msg, data = "") => {
+    if (!should("debug")) return;
     console.log(
       `${colors.bgCyan}${colors.white} WEBSOCKET ${colors.reset} ${colors.cyan}${msg}${colors.reset}`,
       data
-    ),
-  message: (msg, data = "") =>
+    );
+  },
+  message: (msg, data = "") => {
+    if (!should("debug")) return;
     console.log(
       `${colors.yellow}📨 ${colors.white}${msg}${colors.reset}`,
       data
-    ),
+    );
+  },
 };
 
-export { log, colors };
+export { log, colors, setLogLevel, getLogLevel };

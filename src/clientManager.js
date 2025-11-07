@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import { log } from "./logger.js";
+import { Purposes } from "./constants.js";
 
 // Store all connected clients with their IDs
 export const wsUsers = new Map();
@@ -60,26 +61,8 @@ export function broadcastStatus(message) {
 }
 
 // Function to notify all other connected clients about new client connection
-export function notifyNewClientConnection(newSessionId) {
+export function notifyNewClientConnection() {
   return;
-  const newClientMessage = `NewClientConnect#${newSessionId}`;
-
-  wsUsers.forEach((client, clientId) => {
-    // Send to all non-dashboard clients except the newly connected one
-    if (
-      clientId !== newSessionId &&
-      client.readyState === WebSocket.OPEN &&
-      !client.isDashboard
-    ) {
-      try {
-        client.send(newClientMessage);
-      } catch (e) {
-        log.error(
-          `Failed to notify client ${clientId} about new connection: ${e.message}`
-        );
-      }
-    }
-  });
 }
 
 // Add a new client to the clients map
@@ -96,4 +79,25 @@ export function removeClient(sessionId) {
 // Get client count
 export function getClientCount() {
   return wsUsers.size;
+}
+
+// Notify all non-dashboard WS users that a user disconnected
+export function notifyUserDisconnected(disconnectedSessionId) {
+  const payload = {
+    senderWsid: "Server",
+    purpose: Purposes.ClientDisconnected,
+    message: disconnectedSessionId,
+  };
+
+  wsUsers.forEach((client, clientId) => {
+    if (client.readyState === WebSocket.OPEN && !client.isDashboard) {
+      try {
+        client.send(JSON.stringify(payload));
+      } catch (e) {
+        log.error(
+          `Failed to notify ${clientId} about disconnection of ${disconnectedSessionId}: ${e.message}`
+        );
+      }
+    }
+  });
 }
