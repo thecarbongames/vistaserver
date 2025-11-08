@@ -126,7 +126,7 @@ function handleClientUpdate(sessionId) {
   const newClientWsidMessage = {
     senderWsid: "Server",
     purpose: Purposes.NewClientConnect,
-    message: sessionId,
+    message: JSON.stringify(wsUsers?.get(sessionId)?.userInfo),
   };
 
   const allSenders = getReadySenders();

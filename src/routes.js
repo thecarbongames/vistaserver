@@ -16,12 +16,12 @@ router.get("/", (req, res) => {
 // API endpoint to get ready clients
 router.get("/readyClients", (req, res) => {
   const readyClients = getReadyClients();
-  res.json({ readyClients });
+  res.json(readyClients);
 });
 // API endpoint to get ready senders
 router.get("/readySenders", (req, res) => {
   const readySenders = getReadySenders();
-  res.json({ readySenders });
+  res.json(readySenders);
 });
 
 export default router;

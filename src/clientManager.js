@@ -23,7 +23,7 @@ export function getReadyClients() {
         wsUser.userInfo.isReadyToConnect &&
         wsUser.userInfo.activityType === "Client"
     )
-    .map((wsUser) => wsUser.userInfo.wsid);
+    .map((wsUser) => wsUser.userInfo);
 }
 function getNonDashboardUsers() {
   return Array.from(wsUsers.values()).filter(
